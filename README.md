@@ -1,6 +1,6 @@
 # Cuarta tarea de APA 2023: Generación de números aleatorios
 
-## Nom i cognoms
+## David Bueno Cleybergh
 
 ## Generación de números aleatorios usando el algoritmo LGC
 
@@ -167,9 +167,117 @@ resultado de la ejecución de los tests unitarios.
 
 #### Código desarrollado
 
-Inserte a continuación el código de los métodos desarrollados en esta tarea, usando los
-comandos necesarios para que se realice el realce sintáctico en Python del mismo (no
-vale insertar una imagen o una captura de pantalla, debe hacerse en formato *markdown*).
+```python
+# aleatorios.py
+
+"""
+Autor: David Bueno Cleybergh  
+Descripción: Este módulo contiene la implementación de un generador de números pseudoaleatorios basado en el método LGC (Linear Congruential Generator).  
+Se incluyen dos variantes: una clase iteradora llamada `Aleat` y una función generadora `aleat()`. Ambas permiten producir secuencias de números entre 0 y m (sin incluir m), usando el mismo algoritmo.
+
+La clase `Aleat` implementa el protocolo de iteradores, con capacidad de reiniciar la secuencia mediante su método `__call__()`.  
+Por otro lado, `aleat()` es una función generadora que permite actualizar la semilla en ejecución usando `send()`.
+
+Pruebas unitarias disponibles mediante `doctest` para verificar el correcto funcionamiento de ambas implementaciones.
+"""
+
+class Aleat:
+    """
+    Generador basado en el algoritmo de congruencia lineal para obtener secuencias de números pseudoaleatorios.
+
+    El cálculo de los valores se realiza mediante la fórmula:
+    x_(n+1) = (a * x_n + c) % m
+
+    Parámetros por defecto:
+    - m: Módulo (por defecto, 2 elevado a 48)
+    - a: Factor multiplicador (25214903917)
+    - c: Término constante (11)
+    - x: Semilla inicial (1212121)
+
+    Métodos:
+    - __next__: Calcula el siguiente valor de la secuencia.
+    - __call__: Permite restablecer la semilla del generador.
+
+    >>> rand = Aleat(m=32, a=9, c=13, x0=11)
+    >>> for _ in range(4):
+    ...     print(next(rand))
+    16
+    29
+    18
+    15
+
+    >>> rand(29)
+    >>> for _ in range(4):
+    ...     print(next(rand))
+    18
+    15
+    20
+    1
+    """
+
+    def __init__(self, m=2**48, a=25214903917, c=11, x0=1212121):
+        self.m = m
+        self.a = a
+        self.c = c
+        self.x = x0
+
+    def __next__(self):
+        """
+        Retorna el próximo número pseudoaleatorio aplicando la fórmula LGC.
+        """
+        self.x = (self.a * self.x + self.c) % self.m
+        return self.x
+
+    def __call__(self, x0):
+        """
+        Permite reiniciar la secuencia con una nueva semilla.
+        """
+        self.x = x0
+
+
+def aleat(m=2**48, a=25214903917, c=11, x0=1212121):
+    """
+    Generador de números pseudoaleatorios usando el algoritmo de congruencia lineal.
+
+    Argumentos:
+    - m: Módulo para limitar el rango de salida [0, m)
+    - a: Valor multiplicador
+    - c: Constante de suma
+    - x0: Valor inicial (semilla)
+
+    Cada llamada a next() produce un nuevo número en la secuencia.  
+    Es posible modificar la semilla en tiempo de ejecución usando el método send().
+
+    >>> rand = aleat(m=64, a=5, c=46, x0=36)
+    >>> for _ in range(4):
+    ...     print(next(rand))
+    34
+    24
+    38
+    44
+
+    >>> rand.send(24)
+    38
+    >>> for _ in range(4):
+    ...     print(next(rand))
+    44
+    10
+    32
+    14
+    """
+
+    x = x0
+    while True:
+        x = (a * x + c) % m
+        new_seed = yield x
+        if new_seed is not None:
+            x = new_seed
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod(verbose=True)
+```
 
 #### Subida del resultado al repositorio GitHub y *pull-request*
 
